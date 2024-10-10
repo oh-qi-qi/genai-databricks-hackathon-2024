@@ -39,10 +39,10 @@ Below are the key takeaways:
    - Leverages distributed computing on Databricks for efficient large-scale processing.
    - Integrates cutting-edge NLP techniques with domain-specific data processing.
    - Provides a comprehensive solution for building code compliance and BIM data analysis.
-
-##System Overview
-
 ---
+
+## System Overview
+![system-overview](https://github.com/user-attachments/assets/11e2815f-039c-49f7-9dbc-52fd807f047b)
 
 ### 1. Query Classification
 - **Type**: LLM Model (Prompt Chaining)
@@ -52,8 +52,6 @@ Below are the key takeaways:
   2. BIM Revit Data 
   3. Compliance Check 
   4. General (other)
-
----
 
 ### 2. Code Regulation RAG Chain
 - **Purpose**: Handles regulatory queries by using Retrieval-Augmented Generation (RAG).
@@ -79,8 +77,6 @@ Below are the key takeaways:
   #### e. LLM Model (RAG)
   - **Technology**: Databricks-hosted LLM (Meta's Llama 3.1)
   - **Function**: Generates answers based on the retrieved context.
-
----
 
 ### 3. BIM Revit Data Chain
 - **Purpose**: Analyzes BIM data using graph-based methodologies.
@@ -109,8 +105,6 @@ Below are the key takeaways:
   - **Technology**: Databricks-hosted LLM (Meta's Llama 3.1)
   - **Function**: Uses the ReAct methodology to generate responses based on BIM data.
 
----
-
 ### 4. Compliance Check Full Chain
 - **Purpose**: Conducts end-to-end compliance assessments.
 - **Sub-Chains**:
@@ -126,8 +120,6 @@ Below are the key takeaways:
   
   #### d. Compliance Check Chain
   - **Function**: Assesses compliance using all gathered data, providing justifications and recommendations.
-
----
 
 ### 5. General Response Chain
 - **Type**: LLM Model (Prompt Chaining)
@@ -181,5 +173,3 @@ Unity Catalog plays a key role in managing the system’s data:
 #### 7. LangChain
 - **Type**: LLM Workflow Framework
 - **Usage**: Supports prompt chaining and agent workflows in the system.
-
----
