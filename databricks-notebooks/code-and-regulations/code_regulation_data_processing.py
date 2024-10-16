@@ -4,27 +4,7 @@
 
 # COMMAND ----------
 
-# MAGIC %run ./dependency_installation_setup
-
-# COMMAND ----------
-
-import os
-
-catalog_name = spark.sql("SELECT current_catalog()").collect()[0][0]
-schema_name = spark.catalog.currentDatabase()
-working_directory = os.getcwd()
-dataset_location = f"/Volumes/{catalog_name}/{schema_name}/regubim-ai-volume/"
-
-print(f"Catalog Name: {catalog_name}")
-print(f"Schema Name: {schema_name}")
-print(f"Working Directory: {working_directory}")
-print(f"Dataset Location: {dataset_location}")
-
-files = dbutils.fs.ls(dataset_location)
-
-# Print the files and folders in the volume
-for file in files:
-    print(file.name)
+# MAGIC %run ../common/installation_setup
 
 # COMMAND ----------
 
@@ -332,6 +312,11 @@ display(df_chunks)
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC #### Create Embedding Model and save to Registry
+
+# COMMAND ----------
+
 # create the sentence transformer (can skip if model exist)
 
 import mlflow
@@ -428,6 +413,11 @@ except Exception as e:
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC #### Create Embeddings and save as Delta Table
+
+# COMMAND ----------
+
 # Generate all the embeddings
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, ArrayType, FloatType
 from pyspark.sql import Row
@@ -508,90 +498,15 @@ df_with_embeddings.write.mode("append").saveAsTable(embedding_table_name)
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC #### Sync the index to the vector endpoint
+
+# COMMAND ----------
+
 # Check if the vector endpoint is ready
 from databricks.vector_search.client import VectorSearchClient
 from databricks.sdk import WorkspaceClient
 import databricks.sdk.service.catalog as c
-
-def wait_for_vs_endpoint_to_be_ready(vsc, vs_endpoint_name):
-  for i in range(180):
-    endpoint = vsc.get_endpoint(vs_endpoint_name)
-    status = endpoint.get("endpoint_status", endpoint.get("status"))["state"].upper()
-    if "ONLINE" in status:
-      return endpoint
-    elif "PROVISIONING" in status or i <6:
-      if i % 20 == 0: 
-        print(f"Waiting for endpoint to be ready, this can take a few min... {endpoint}")
-      time.sleep(10)
-    else:
-      raise Exception(f'''Error with the endpoint {vs_endpoint_name}. - this shouldn't happen: {endpoint}.\n Please delete it and re-run the previous cell: vsc.delete_endpoint("{vs_endpoint_name}")''')
-  raise Exception(f"Timeout, your endpoint isn't ready yet: {vsc.get_endpoint(vs_endpoint_name)}")
-
-def wait_for_index_to_be_ready(vsc, vs_endpoint_name, index_name):
-  for i in range(180):
-    idx = vsc.get_index(vs_endpoint_name, index_name).describe()
-    index_status = idx.get('status', idx.get('index_status', {}))
-    status = index_status.get('detailed_state', index_status.get('status', 'UNKNOWN')).upper()
-    url = index_status.get('index_url', index_status.get('url', 'UNKNOWN'))
-    if "ONLINE" in status:
-      return
-    if "UNKNOWN" in status:
-      print(f"Can't get the status - will assume index is ready {idx} - url: {url}")
-      return
-    elif "PROVISIONING" in status:
-      if i % 40 == 0: print(f"Waiting for index to be ready, this can take a few min... {index_status} - pipeline url:{url}")
-      time.sleep(10)
-    else:
-        raise Exception(f'''Error with the index - this shouldn't happen. DLT pipeline might have been killed.\n Please delete it and re-run the previous cell: vsc.delete_index("{index_name}, {vs_endpoint_name}") \nIndex details: {idx}''')
-  raise Exception(f"Timeout, your index isn't ready yet: {vsc.get_index(index_name, vs_endpoint_name)}")
-
-def create_vs_endpoint(vs_endpoint_name):
-    vsc = VectorSearchClient()
-
-    # check if the endpoint exists
-    if vs_endpoint_name not in [e['name'] for e in vsc.list_endpoints()['endpoints']]:
-        vsc.create_endpoint(name=VECTOR_SEARCH_ENDPOINT_NAME, endpoint_type="STANDARD")
-
-    # check the status of the endpoint
-    wait_for_vs_endpoint_to_be_ready(vsc, vs_endpoint_name)
-    print(f"Endpoint named {vs_endpoint_name} is ready.")
-
-def create_vs_index(vs_endpoint_name, vs_index_fullname, source_table_fullname, source_col):
-    #create compute endpoint
-    vsc = VectorSearchClient()
-    create_vs_endpoint(vs_endpoint_name)
-    
-    # create or sync the index
-    if not index_exists(vsc, vs_endpoint_name, vs_index_fullname):
-        print(f"Creating index {vs_index_fullname} on endpoint {vs_endpoint_name}...")
-        
-        vsc.create_delta_sync_index(
-            endpoint_name=vs_endpoint_name,
-            index_name=vs_index_fullname,
-            source_table_name=source_table_fullname,
-            pipeline_type="TRIGGERED", #Sync needs to be manually triggered
-            primary_key="id",
-            embedding_source_column=source_col,
-            embedding_model_endpoint_name="databricks-bge-large-en"
-        )
-        
-        # vsc.create_delta_sync_index(
-        #     endpoint_name=vs_endpoint_name,
-        #     index_name=vs_index_fullname,
-        #     source_table_name=source_table_fullname,
-        #     pipeline_type="TRIGGERED", #Sync needs to be manually triggered
-        #     primary_key="id",
-        #     embedding_dimension=1024, #Match your model embedding size (bge)
-        #     embedding_vector_column="embedding"
-        # )
-
-    else:
-        #Trigger a sync to update our vs content with the new data saved in the table
-        vsc.get_index(vs_endpoint_name, vs_index_fullname).sync()
-
-    #Let's wait for the index to be ready and all our embeddings to be created and indexed
-    wait_for_index_to_be_ready(vsc, vs_endpoint_name, vs_index_fullname)
-
 
 vsc = VectorSearchClient(disable_notice=True)
 VECTOR_SEARCH_ENDPOINT_NAME = f"vs_endpoint_{catalog_name}"
@@ -631,250 +546,3 @@ else:
 
   # let's wait for the index to be ready and all our embeddings to be created and indexed
 wait_for_index_to_be_ready(vsc, vs_endpoint_name, vs_index_fullname)
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC #### RAG Langchain - Code and Regulation
-
-# COMMAND ----------
-
-from databricks.vector_search.client import VectorSearchClient
-from langchain.embeddings import DatabricksEmbeddings
-from langchain_core.runnables import RunnableLambda
-from langchain.docstore.document import Document
-from flashrank import Ranker, RerankRequest
-
-import mlflow.pyfunc
-import pandas as pd
-
-
-def code_regulation_get_retriever():
-
-    def retrieve(query, k: int=10):
-        if isinstance(query, dict):
-            query = next(iter(query.values()))
-
-        # get the vector search index
-        vsc = VectorSearchClient(disable_notice=True)
-        vs_index = vsc.get_index(endpoint_name=vs_endpoint_name, index_name=vs_index_fullname)
-        
-        # get the query vector
-        query_embeddings = loaded_embedding_model.predict(pd.DataFrame({"text": [query]}))
-        query_vector = query_embeddings.iloc[0].tolist()  # Convert DataFrame to list
-
-        # Perform the similarity search and get similar k documents
-        return query, vs_index.similarity_search(
-            query_vector=query_vector,
-            columns=["id", "document_name", "section", "content", "url"],
-            num_results=k)
-        
-    def rerank(query, retrieved, ranker_model, k: int=10):
-        # format result to align with reranker lib format 
-        passages = []
-        for doc in retrieved.get("result", {}).get("data_array", []):
-            new_doc = {
-                "score": doc[-1], 
-                "id" : doc[0], 
-                "file": doc[1], 
-                "section": doc[2], 
-                "chunk": doc[3],
-                "url":doc[4]
-                }
-            passages.append(new_doc)       
-        # Load the flashrank ranker
-        ranker = Ranker(model_name=ranker_model)
-
-        # rerank the retrieved documents
-        rerankrequest = RerankRequest(query=query, passages=
-                                      [{'id': passage['id'],
-                                        'text': passage['chunk'],
-                                        "meta": {
-                                            "section": passage['section'],
-                                            "document_name": passage['file'],
-                                            "url":passage['url']
-                                                 }
-                                        } for passage in passages]
-                                      )
-        results = ranker.rerank(rerankrequest)[:k]
-      
-        # format the results of rerank to be ready for prompt
-        return [Document(page_content=r.get("text"),
-                         metadata={
-                             "rank_score": r.get("score"), 
-                             "vector_id": r.get("id"),
-                             "section": r.get("meta").get("section"),
-                             "document_name": r.get("meta").get("document_name"),
-                             "url": r.get("meta").get("url")}) for r in results]
-
-    # the retriever is a runnable sequence of retrieving and reranking.
-    return RunnableLambda(retrieve) | RunnableLambda(lambda x: rerank(x[0], x[1],"ms-marco-MiniLM-L-12-v2"))
-
-# COMMAND ----------
-
-from langchain.chains import LLMChain, StuffDocumentsChain
-from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
-from langchain_core.runnables import RunnableLambda
-
-code_regulation_prompt_template = """
-    You are an assistant specializing in building codes, safety regulations, and design standards for various room types in buildings. Your task is to extract and provide relevant information about codes, regulations, and standards for the room type mentioned in the question.
-
-    Use the following pieces of context and metadata:
-
-    <context>
-    {context}
-    </context>
-
-    <metadata>
-    Section: {metadata_section}
-    </metadata>
-
-    Follow these steps:
-    1. Identify the room type mentioned in the question.
-    2. Extract and list all relevant codes, regulations, standards, and requirements for the identified room type. Include specific measurements, materials, equipment, location, and any other pertinent details if available.
-    3. Organize the information clearly, grouping related requirements together.
-    4. If specific information for the mentioned room type is not available, provide general building codes or regulations that might be applicable.
-
-    Provide only factual information from the given context. Do not make assumptions or assessments about compliance. If certain information is not available, clearly state this.
-
-    Question: {input}
-
-    Answer:
-    """
-
-# Unwrap the LangChain document from the context to be a dict for logging and MLflow purposes
-
-def unwrap_code_regulation_query_document(answer):
-    """
-    In answer has the following:
-        context
-        metadata_section
-        input
-        input_documents
-        output_text
-    """
-    return answer | {"context": [{"metadata": answer.get("metadata_section"), "page_content": answer.get("context")}]}
-
-def code_regulation_process_question(question, chain):
-    # Step 1: Retrieve relevant documents based on the question
-    vectorstore = code_regulation_get_retriever()
-    similar_documents = vectorstore.invoke(question)
-
-    # Step 2: Group documents by metadata (document name and section) and gather content + metadata in one loop
-    grouped_documents = {}
-    compiled_context = []
-    metadata_section = []
-    
-    for doc in similar_documents:
-        key = f"{doc.metadata.get('document_name')} - {doc.metadata.get('section')}"
-        
-        # Group document content by metadata
-        if key not in grouped_documents:
-            grouped_documents[key] = []
-        
-        grouped_documents[key].append(doc.page_content)
-        
-        # Check for URL and append it to metadata info
-        if key not in metadata_section:
-            metadata_info = f"Section: {key}"
-            url = doc.metadata.get('url')
-            if url:
-                metadata_info += f", URL: {url}"
-            metadata_section.append(metadata_info)
-
-    # Step 3: Compile the context and metadata only once, minimizing string concatenation in the loop
-    final_context = "\n\n".join("\n".join(pages) for pages in grouped_documents.values())
-    final_metadata_section = ", ".join(metadata_section)
-
-    # Step 4: Prepare the input for the chain
-    input_data = {
-        "context": final_context,  # Combined content for all documents
-        "metadata_section": final_metadata_section,  # Combined metadata
-        "input": question["input"],  # The user's input question
-        "input_documents": similar_documents  # The list of documents for StuffDocumentsChain
-    }
-
-    # Step 5: Invoke the final chain once with the input data
-    answer = chain.invoke(input_data)
-
-    # Step 6: Return the final compiled answer
-    return answer.get("output_text")
-
-# COMMAND ----------
-
-from langchain_community.chat_models import ChatDatabricks
-
-# Create the document prompt for each document
-code_regulation_query_document_prompt = PromptTemplate(
-    input_variables=["page_content"], 
-    template="{page_content}"
-)
-
-# Define the document variable name
-code_regulation_query_document_variable_name = "context"
-
-# Create the main prompt using ChatPromptTemplate
-code_regulation_query_prompt = ChatPromptTemplate.from_template(code_regulation_query_template)
-
-# Create the LLM chain for processing
-code_regulation_model = ChatDatabricks(endpoint="databricks-meta-llama-3-1-70b-instruct", max_tokens = 3000)
-code_regulation_query_llm_chain = LLMChain(llm=code_regulation_model, prompt=code_regulation_query_prompt)
-
-# Create the StuffDocumentsChain with the LLM chain and document prompt
-code_regulation_chain = StuffDocumentsChain(
-    llm_chain=code_regulation_query_llm_chain,
-    document_prompt=code_regulation_query_document_prompt,
-    document_variable_name=code_regulation_query_document_variable_name,
-)
-
-# Combine the chains and the unwrapping function
-code_regulation_final_chain = code_regulation_chain | RunnableLambda(unwrap_code_regulation_query_document)
-
-# COMMAND ----------
-
-# Example question to pass to your process_question function
-code_regulation_question_1 =  {"input": "What are the regulations for fire exits?"}
-
-# Call the function to get the answer
-code_regulation_answer_1 = code_regulation_process_question(code_regulation_question_1, code_regulation_final_chain)
-
-print(code_regulation_answer_1)
-
-# COMMAND ----------
-
-# Example question to pass to your process_question function
-code_regulation_question_1 =  {"input": "What are the regulations for fcc?"}
-
-# Call the function to get the answer
-code_regulation_answer_1 = code_regulation_process_question(code_regulation_question_1, code_regulation_final_chain)
-
-print(code_regulation_answer_1)
-
-# COMMAND ----------
-
-# Only run this if want to create model in model registry
-from mlflow.models import infer_signature
-import mlflow
-import langchain
-
-code_regulation_model_name = "code_regulations_rag_model"
-
-# save the langchain model to registry if needed
-with mlflow.start_run(run_name="code_regulations_rag_model") as run:
-    # Infer the signature from the question and answer
-    code_regulation_signature = infer_signature(code_regulation_question, code_regulation_answer)
-
-    # Log the code_regulation_final_chain model to MLflow with retriever
-    model_info = mlflow.langchain.log_model(
-        code_regulation_final_chain,
-        loader_fn=code_regulation_get_retriever,  # Ensure get_retriever is defined
-        artifact_path="code_regulation_final_chain",
-        registered_model_name=code_regulation_model_name,
-        pip_requirements=[
-            "mlflow==" + mlflow.__version__,
-            "langchain==" + langchain.__version__,
-            "databricks-vectorsearch",
-        ],
-        input_example=code_regulation_question,  # Set the input example as the question
-        signature=code_regulation_signature  # Add the inferred signature
-    )
