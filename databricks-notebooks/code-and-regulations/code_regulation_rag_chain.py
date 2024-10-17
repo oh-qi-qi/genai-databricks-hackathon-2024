@@ -263,7 +263,7 @@ code_regulation_rag_chain = create_code_regulation_rag_chain(llm_model)
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ### Test the code and regulation chain
+# MAGIC ### Test the code and regulation rag chain
 
 # COMMAND ----------
 
@@ -312,7 +312,7 @@ console.print(Panel(md_output_2, title="Output", expand=False))
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC #### Create Code and Regulation Model and save to Registry (Optional)
+# MAGIC #### Create Code and Regulation Rag Model and save to Registry (Optional)
 
 # COMMAND ----------
 

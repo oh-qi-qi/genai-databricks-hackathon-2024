@@ -4,27 +4,7 @@
 
 # COMMAND ----------
 
-# MAGIC %run ./dependency_installation_setup
-
-# COMMAND ----------
-
-import os
-
-catalog_name = spark.sql("SELECT current_catalog()").collect()[0][0]
-schema_name = spark.catalog.currentDatabase()
-working_directory = os.getcwd()
-dataset_location = f"/Volumes/{catalog_name}/{schema_name}/regubim-ai-volume/"
-
-print(f"Catalog Name: {catalog_name}")
-print(f"Schema Name: {schema_name}")
-print(f"Working Directory: {working_directory}")
-print(f"Dataset Location: {dataset_location}")
-
-files = dbutils.fs.ls(dataset_location)
-
-# Print the files and folders in the volume
-for file in files:
-    print(file.name)
+# MAGIC %run ../common/installation_setup
 
 # COMMAND ----------
 
