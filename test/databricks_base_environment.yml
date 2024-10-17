@@ -1,0 +1,5 @@
+client: "1"
+dependencies:
+  - --index-url https://pypi.org/simple
+  - -r "/Workspace/Shared/genai-databricks-hackathon-2024/requirements.txt"
+  - cowsay==6.1
