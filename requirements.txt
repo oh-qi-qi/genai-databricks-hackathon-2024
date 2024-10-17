@@ -20,6 +20,7 @@ cloudpickle==2.0.0
 langchain-core==0.3.10
 langsmith==0.1.132
 databricks-sdk==0.34.0
+networkx==3.4.1
 python-dotenv
 requests
 rich
