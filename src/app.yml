@@ -1,0 +1,14 @@
+env:
+  - name: "DATABRICKS_URL"
+    valueFrom: "secret-databricks-url"
+  - name: "DATABRICKS_TOKEN"
+    valueFrom: "secret-databricks-token"
+  - name: "DATABRICKS_JOB_ID"
+    valueFrom: "job-run-compliance-chain"
+
+command: [
+  "streamlit",
+  "run",
+  "main/chatbot_interface.py"
+]
+

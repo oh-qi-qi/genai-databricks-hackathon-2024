@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.INFO)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Now import from databricks_handler.databricks_job_handler
-from databricks_handler.databricks_job_handler import (
+from databricks_job_handler import (
     trigger_databricks_job,
     wait_for_job_completion,
     get_databricks_job_output,
