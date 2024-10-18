@@ -8,35 +8,24 @@ import datetime
 import streamlit as st
 import streamlit.components.v1 as components
 
-# At the top of your script, after the imports
 import logging
-
-# Set up logging
 logging.basicConfig(level=logging.INFO)
-
 
 # Add the 'src' folder to sys.path if you're running from within the 'ui' directory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-# Now import from databricks_handler.databricks_job_handler
-from databricks_job_handler import (
-    trigger_databricks_job,
-    wait_for_job_completion,
-    get_databricks_job_output,
-    get_task_run_id,
-    print_nested_dict_display
-)
+# Import relevant modules
+from databricks_scripts import databricks_job_handler
+from common import utils
 
 # Load Font Awesome CDN
-st.markdown("""
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-""", unsafe_allow_html=True)
+st.markdown("""<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">""", unsafe_allow_html=True)
 
 # Dynamically get the path to the assets directory and chat history file
 current_dir = os.path.dirname(os.path.abspath(__file__))
 svg_logo_path = os.path.join(current_dir, "assets", "logo-regubim-ai.svg")
 chat_history_path = os.path.join(current_dir, "chat_history.json")
-visualisation_template_path = os.path.join(current_dir, "visualisation-templates", "room-route-visualisation-min.html")
+visualisation_template_path = os.path.join(current_dir, "visualisation_templates", "room-route-visualisation-min.html")
 visualisation_iframe_height = 500
 
 if not os.path.exists(visualisation_template_path):
@@ -70,11 +59,11 @@ def save_chat_history(history):
 # Function to call the Databricks model
 def call_databricks_model(prompt):
     try:
-        run_id = trigger_databricks_job(prompt)
+        run_id = databricks_job_handler.trigger_databricks_job(prompt)
         print(f"Job triggered. Run ID: {run_id}")
-        wait_for_job_completion(run_id)
-        task_run_id = get_task_run_id(run_id)
-        result = get_databricks_job_output(task_run_id)
+        databricks_job_handler.wait_for_job_completion(run_id)
+        task_run_id = databricks_job_handler.get_task_run_id(run_id)
+        result = databricks_job_handler.get_databricks_job_output(task_run_id)
         return json.loads(result)
     except Exception as e:
         return f"Error: {str(e)}"
