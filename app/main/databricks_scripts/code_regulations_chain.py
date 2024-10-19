@@ -6,13 +6,6 @@ from langchain_community.embeddings import DatabricksEmbeddings
 from langchain_community.chat_models import ChatDatabricks
 from flashrank import Ranker, RerankRequest
 
-#from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
-#from langchain_core.runnables import RunnableLambda
-#
-#from langchain.chains import LLMChain
-#from langchain.chains.combine_documents.stuff import StuffDocumentsChain
-#from langchain.docstore.document import Document
-
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.docstore.document import Document
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
@@ -125,16 +118,6 @@ def create_code_regulation_rag_chain(llm_model):
                 if url:
                     metadata_info += f", URL: {url}"
                 metadata_section.append(metadata_info)
-
-#        final_context = "\n\n".join("\n".join(pages) for pages in grouped_documents.values())
-#        final_metadata_section = ", ".join(metadata_section)
-#        
-#        retrieve_info = {
-#            "context": final_context,
-#            "metadata_section": final_metadata_section,
-#            "input": query,
-#            "input_documents": docs
-#        }
         
         # Create new Document objects with the grouped content
         grouped_doc_objects = [
@@ -273,30 +256,6 @@ def create_code_regulation_rag_chain(llm_model):
 
     return retriever_chain
 
-#    # Create the main prompt
-#    code_regulation_prompt = ChatPromptTemplate.from_template(code_regulation_prompt_template)
-#    
-#    # Create the document prompt
-#    code_regulation_prompt_document_prompt = PromptTemplate(
-#        input_variables=["page_content"],
-#        template="{page_content}"
-#    )
-#    
-#    # Create the LLM chain
-#    llm_chain = LLMChain(llm=llm_model, prompt=code_regulation_prompt)
-#
-#    # Create the StuffDocumentsChain
-#    stuff_chain = StuffDocumentsChain(
-#        llm_chain=llm_chain,
-#        document_prompt=code_regulation_prompt_document_prompt,
-#        document_variable_name="context"
-#    )
-#
-#    # Combine the chains
-#    retriever_chain = RunnableLambda(retrieve) | RunnableLambda(rerank)
-#    final_chain = retriever_chain | RunnableLambda(process_retrieved_docs) | stuff_chain | RunnableLambda(format_output)
-#
-#    return final_chain
 
 llm_model = ChatDatabricks(endpoint="databricks-meta-llama-3-1-70b-instruct", max_tokens=3000, temperature=0.0)
 code_regulation_rag_chain = create_code_regulation_rag_chain(llm_model)

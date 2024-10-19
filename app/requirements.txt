@@ -25,3 +25,4 @@ python-dotenv
 requests
 rich
 streamlit
+databricks-sql-connector

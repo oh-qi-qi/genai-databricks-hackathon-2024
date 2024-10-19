@@ -8,6 +8,7 @@ load_dotenv()
 # Get Databricks environment variables
 DATABRICKS_URL = os.getenv('DATABRICKS_URL')
 TOKEN = os.getenv('DATABRICKS_TOKEN')
+DATABRICKS_WAREHOUSE_ID = os.getenv('DATABRICKS_WAREHOUSE_ID')
 
 # Catalog, schema, and volume settings
 catalog_name = "llm_workspace"

@@ -1,6 +1,7 @@
 from rich.console import Console
 from rich.panel import Panel
 from rich.markdown import Markdown
+import json
 
 def print_nested_dict_display(data):
     console = Console()
