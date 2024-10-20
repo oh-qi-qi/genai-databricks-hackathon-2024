@@ -21,6 +21,16 @@ for file in files:
 
 # COMMAND ----------
 
+# Copy the file from the volume to DBFS
+volume_file_path = f"{dataset_location}/SCDF Chapter 8 - Emergency Lighting & Voice Communication Systems.pdf"
+dbfs_target_path = "/dbfs/tmp/SCDF_Chapter_8.pdf"
+
+# Copy the file from volume to DBFS
+dbutils.fs.cp(volume_file_path, dbfs_target_path)
+
+
+# COMMAND ----------
+
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # Suppress TensorFlow logs
 
