@@ -65,13 +65,3 @@ def create_chain_query_classification(llm_model):
 
     # Convert the wrapper function to a RunnableLambda
     return RunnableLambda(chain_with_io)
-
-# Test intent chain Sample
-
-# Initialize the LLM
-query_intent_category_model = ChatDatabricks(endpoint="databricks-meta-llama-3-1-70b-instruct", max_tokens=500)
-
-# Example input for signature inference (as pandas DataFrame)
-chain_query_classification = create_chain_query_classification(query_intent_category_model)
-intent_result = chain_query_classification.invoke({"query": "What are the building codes for ELV rooms?"})
-print(intent_result)

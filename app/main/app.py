@@ -4,6 +4,7 @@ import json
 import time
 import random
 import datetime
+import pandas as pd
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -11,22 +12,38 @@ import streamlit.components.v1 as components
 import logging
 logging.basicConfig(level=logging.INFO)
 
-# Add the 'src' folder to sys.path if you're running from within the 'ui' directory
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+main_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, main_dir)
 
 # Import relevant modules
-from databricks_scripts import databricks_job_handler
-from common import utils
+from databricks_scripts.multi_chain import MultiStageSystemWrapper
+from common.utils import print_nested_dict_display
 
-# Load Font Awesome CDN
-st.markdown("""<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">""", unsafe_allow_html=True)
+from common.databricks_config import (
+    DATABRICKS_URL, 
+    TOKEN, 
+    DATABRICKS_WAREHOUSE_ID,
+    catalog_name, 
+    schema_name
+)
 
 # Dynamically get the path to the assets directory and chat history file
 current_dir = os.path.dirname(os.path.abspath(__file__))
 svg_logo_path = os.path.join(current_dir, "assets", "logo-regubim-ai.svg")
+ico_logo_path = os.path.join(current_dir, "assets", "logo-regubim-ai.ico")
 chat_history_path = os.path.join(current_dir, "chat_history.json")
 visualisation_template_path = os.path.join(current_dir, "visualisation_templates", "room-route-visualisation-min.html")
 visualisation_iframe_height = 500
+
+# Set a new icon
+st.set_page_config(
+    page_title="ReguBIM AI",
+    page_icon=ico_logo_path
+)
+
+# Load Font Awesome CDN
+st.markdown("""<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">""", unsafe_allow_html=True)
+
 
 if not os.path.exists(visualisation_template_path):
     logging.error(f"Visualization template not found at: {visualisation_template_path}")
@@ -39,10 +56,21 @@ if os.path.exists(svg_logo_path):
 else:
     st.error("SVG logo file not found")
 
+
 # List of loading messages
 loading_messages = [
     "ReguBIM AI is processing your request..."
 ]
+
+def display_welcome_message():
+    st.markdown("""
+    <div style="display: flex; justify-content: center; align-items: center; height: 70vh;">
+        <div style="text-align: center; padding: 20px; background-color: #f0f2f6; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+            <h2>Welcome to ReguBIM AI!</h2>
+            <p>How can I assist you today?</p>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Function to load chat history
 def load_chat_history():
@@ -56,17 +84,42 @@ def save_chat_history(history):
     with open(chat_history_path, "w") as f:
         json.dump(history, f, default=lambda o: '<not serializable>')
 
-# Function to call the Databricks model
-def call_databricks_model(prompt):
+def call_databricks_chain(prompt, max_time=180, poll_interval=10):
     try:
-        run_id = databricks_job_handler.trigger_databricks_job(prompt)
-        print(f"Job triggered. Run ID: {run_id}")
-        databricks_job_handler.wait_for_job_completion(run_id)
-        task_run_id = databricks_job_handler.get_task_run_id(run_id)
-        result = databricks_job_handler.get_databricks_job_output(task_run_id)
-        return json.loads(result)
+        print(f"Processing query: {prompt}")
+        
+        query_df = pd.DataFrame([{"query": prompt, "debug_mode": False}])
+        
+        llm_model_name = "databricks-meta-llama-3-1-70b-instruct"
+        multi_chain_wrapper = MultiStageSystemWrapper(llm_model_name, catalog_name, schema_name, DATABRICKS_URL, TOKEN, DATABRICKS_WAREHOUSE_ID)
+        
+        start_time = time.time()
+        warning_issued = False
+        
+        while True:
+            result = multi_chain_wrapper.predict(query_df)
+            
+            if result is not None:
+                try:
+                    return result[0]
+                except json.JSONDecodeError:
+                    pass  # We'll print the waiting message below
+            
+            elapsed_time = time.time() - start_time
+            print(f"Waiting... Elapsed time: {elapsed_time:.1f} seconds")
+            
+            if elapsed_time > 120 and not warning_issued:
+                print("⚠️ Warning: Query is taking longer than 120 seconds.")
+                warning_issued = True
+            
+            if elapsed_time > max_time:
+                return {"error": f"Query timed out after {max_time} seconds."}
+            
+            time.sleep(poll_interval)
+    
     except Exception as e:
-        return f"Error: {str(e)}"
+        return {"error": f"Error: {str(e)}"}
+
     
 def print_output_and_visualisation(data):
     def format_value(value):
@@ -286,8 +339,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("ReguBIM AI Chatbot")
-
 # Sidebar for past chats and settings
 st.sidebar.markdown(f'''
     <div style="text-align: center; margin-bottom: 0px;">
@@ -356,13 +407,15 @@ if prompt := st.chat_input("Ask a question:"):
     st.rerun()
 
 # Modify the part where we display past messages to include visualizations
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-        if message["role"] == "assistant" and "visualization" in message and message["visualization"]:
-            components.html(message["visualization"], height = visualisation_iframe_height, scrolling=True)
-
-# Handle loading state and model response
+if st.session_state.messages:
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+            if message["role"] == "assistant" and "visualization" in message and message["visualization"]:
+                components.html(message["visualization"], height=visualisation_iframe_height, scrolling=True)
+else:
+    display_welcome_message()
+    
 # Handle loading state and model response
 if st.session_state.loading:
     # Display loading message outside of chat messages
@@ -374,34 +427,43 @@ if st.session_state.loading:
     </div>
     """, unsafe_allow_html=True)
 
-    # Call the model
-    model_response = call_databricks_model(st.session_state.messages[-1]["content"])
+    try:
+        chain_response = call_databricks_chain(prompt=st.session_state.messages[-1]["content"])
+        
+        if chain_response:
+            st.session_state.loading = False
+            loading_placeholder.empty()  # Remove the loading message
+        
+            try:
+                response_dict = json.loads(chain_response)
+                if "error" in response_dict:
+                    st.error(f"An error occurred: {response_dict['error']}")
+                else:
+                    # Process and display the response as before
+                    markdown_content, html_visualisation = print_output_and_visualisation(response_dict)
+                    
+                    with st.chat_message("assistant"):
+                        st.markdown(markdown_content)
+                        if html_visualisation:
+                            components.html(html_visualisation, height=visualisation_iframe_height, scrolling=True)
 
-    if model_response:
+                    # Update chat history
+                    st.session_state.messages.append({
+                        "role": "assistant",
+                        "content": markdown_content,
+                        "visualization": html_visualisation if html_visualisation else None
+                    })
+
+                    st.session_state.chat_history[st.session_state.current_chat_index]["messages"] = st.session_state.messages
+                    save_chat_history(st.session_state.chat_history)
+            except json.JSONDecodeError:
+                st.error("Received an invalid response from the model.")
+    except Exception as e:
         st.session_state.loading = False
         loading_placeholder.empty()  # Remove the loading message
+        st.error(f"An error occurred while processing your request: {str(e)}")
 
-        # Get both markdown content and visualisation HTML
-        markdown_content, html_visualisation = print_output_and_visualisation(model_response)
-
-        # Display the assistant's message and visualization together
-        with st.chat_message("assistant"):
-            st.markdown(markdown_content)
-            if html_visualisation:
-                components.html(html_visualisation, height = visualisation_iframe_height, scrolling=True)
-
-        # Append the formatted markdown response and visualization to the chat history
-        st.session_state.messages.append({
-            "role": "assistant",
-            "content": markdown_content,
-            "visualization": html_visualisation if html_visualisation else None
-        })
-
-        # Save chat history
-        st.session_state.chat_history[st.session_state.current_chat_index]["messages"] = st.session_state.messages
-        save_chat_history(st.session_state.chat_history)
-
-        st.rerun()
+    st.rerun()
 
 # Update loading message
 if st.session_state.loading:

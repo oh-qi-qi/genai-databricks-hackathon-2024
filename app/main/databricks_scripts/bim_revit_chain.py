@@ -33,23 +33,10 @@ from rich.markdown import Markdown
 from rich.panel import Panel
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
-main_dir = os.path.dirname(current_dir)
-sys.path.insert(0, main_dir)
+sys.path.insert(0, current_dir)
 
 from bim_revit_agent.bim_revit_agent_setup import BIMRevitAgent
     
-
-from common.utils import print_nested_dict_display
-
-# Usage example
-from common.databricks_config import (
-    DATABRICKS_URL, 
-    TOKEN, 
-    DATABRICKS_WAREHOUSE_ID,
-    catalog_name, 
-    schema_name
-)
-
 
 def create_bim_revit_data_chain(catalog_name, schema_name,llm_model, databricks_url, token, databricks_warehouse_id):
     
@@ -60,24 +47,3 @@ def create_bim_revit_data_chain(catalog_name, schema_name,llm_model, databricks_
         return result
     
     return RunnableLambda(process_wrapper)
-
-llm_model = ChatDatabricks(endpoint="databricks-meta-llama-3-1-70b-instruct", max_tokens=3000, temperature=0.0)
-bim_revit_data_chain = create_bim_revit_data_chain(catalog_name, schema_name, llm_model, DATABRICKS_URL, TOKEN, DATABRICKS_WAREHOUSE_ID)
-
-bim_revit_question_1 = {"query": "What is the total number of rooms and the list of room names in the building?", "intent_category": "BIM Revit Data"}
-
-# Call the function to get the answer
-bim_revit_answer_1 = bim_revit_data_chain.invoke(bim_revit_question_1)
-print_nested_dict_display(bim_revit_answer_1)
-
-#bim_revit_question_2 = {"query": "What is the total number of paths?", "intent_category": "BIM Revit Data"}
-#
-## Call the function to get the answer
-#bim_revit_answer_2 = bim_revit_data_chain.invoke(bim_revit_question_2)
-#print_nested_dict_display(bim_revit_answer_2)
-
-#bim_revit_question_3 = {"query": "What are the paths from Fcc to staircase?", "intent_category": "BIM Revit Data"}
-#
-## Call the function to get the answer
-#bim_revit_answer_3 = bim_revit_data_chain.invoke(bim_revit_question_3)
-#print_nested_dict_display(bim_revit_answer_3)

@@ -13,12 +13,9 @@ import inflection
 from fuzzywuzzy import process  # FuzzyWuzzy (for string matching)
 
 # LangChain imports
-from langchain.agents import ZeroShotAgent, Tool, AgentExecutor
-from langchain.memory import ConversationBufferMemory
-from langchain.chains import LLMChain, StuffDocumentsChain
-from langchain.prompts import PromptTemplate, ChatPromptTemplate
-from langchain.docstore.document import Document
-from langchain_core.output_parsers import StrOutputParser
+from langchain.agents import AgentExecutor, create_structured_chat_agent
+from langchain.prompts import ChatPromptTemplate, HumanMessagePromptTemplate, SystemMessagePromptTemplate
+from langchain.tools import Tool
 
 import sys
 import os
@@ -78,20 +75,22 @@ class BIMRevitAgent:
 
         bim_revit_agent_template = f"""
         As an expert in room analysis, answer the following questions to the best of your ability. You have access to the following tools:
-
+        
+        {{tools}}
         {tool_descriptions}
 
         Use the following format:
 
         Question: the input question you must answer
         Thought: you should always think about what to do and which tool (if any) to use
-        Action: the action to take, should be one of [{tool_names}], or 'None' if no action is needed
+        Action: the action to take, should be one of {{tool_names}}, or [{tool_names}],or 'None' if no action is needed
         Action Input: the input to the action (if any), or 'None' if no action is needed
         Observation: the result of the action (summarize large JSON outputs or split into manageable chunks), or 'None' if no action was taken
         ... (this Thought/Action/Action Input/Observation can repeat N times as needed)
         Thought: I now know the final answer
-        Final Answer: a JSON object with two keys: 'final_answer' containing the human-readable answer to the question including any relevant notes, and 'visualization_json' containing the actual JSON data for visualization or None if not applicable
-
+        Visualization JSON: only the valid JSON format data for visualization, or 'None' if not applicable
+        Final Answer:  the final answer to the question and include any relevant note as the value and the key is `final_answer` and the Visualization JSON with the key `visualization_json` as the key
+        
         Important notes:
 
         1. **Efficient Handling of Simple Queries:**
@@ -136,36 +135,32 @@ class BIMRevitAgent:
         - Ensure that the paths returned are relevant to the specified source and target rooms.
         - Use -> to separate each room in the path (e.g., Room1 -> Room2 -> Room3)
         - For each path, calculate and report the distance in meters (m) and ensure it is in the final answer.
-        - If there is more than 1 path, just list it as a list in markdown format. Last item remember to add a new line after it.
         - Only consider paths through hallways and other critical areas.
         - If no relevant paths are found, inform the user.
 
         4. **After Using RoomPathCalculation:**
         - If there are five or fewer relevant paths, use `RoomPathVisualization` to display the result.
         - If there are more than five paths, do not invoke `RoomPathVisualization` and inform the user that there are too many paths for visualization.
+        - Review the paths returned to ensure they start from the source room and end at the target room.
 
         5. **Using the RoomRelationshipAnalysis Tool:**
         - Use this tool for analyzing relationships between rooms and retrieving room data, including connections.
         - You can provide queries in natural language, and the tool will interpret the intent of the query.
         - For simple queries, use the tool immediately without overthinking and return in markdown format.
-        
-        6. **Formatting the Final Answer:**
-        - The Final Answer must be a valid JSON object with two keys: 'final_answer' and 'visualization_json'.
-        - 'final_answer' should contain the human-readable summary of the results.
-        - 'visualization_json' should contain the complete visualization data from the last observation, not a reference to it or none if is not applicable
-        - Do not use phrases like "provided in the previous Observation" or "as shown above". Include the actual data.
-        - Ensure all JSON is properly formatted and escaped within the final answer string.
 
         Begin!
 
         Question: {{input}}
         {{agent_scratchpad}}
         """
-        
 
-        prompt = PromptTemplate.from_template(bim_revit_agent_template)
-        llm_chain = LLMChain(llm=self.bim_revit_data_model, prompt=prompt)
-        agent = ZeroShotAgent(llm_chain=llm_chain, tools=self.tools)
+        prompt = ChatPromptTemplate.from_template(bim_revit_agent_template)
+
+        agent = create_structured_chat_agent(
+            llm=self.bim_revit_data_model,
+            tools=self.tools,
+            prompt=prompt
+        )
 
         self.room_analysis_agent = AgentExecutor(
             agent=agent,

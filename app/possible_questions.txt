@@ -1,0 +1,5 @@
+Hello, can you help me?
+How many rooms are there and can you list all the rooms?
+What are FCC Room Requirements I have to comply with?
+What is the path from FCC to Staircase?
+Does the FCC comply with code and regulation?

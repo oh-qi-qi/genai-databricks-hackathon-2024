@@ -22,21 +22,7 @@ import os
 import sys
 
 
-# Add the parent directory to sys.path
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)
-sys.path.insert(0, parent_dir)
-
-from common.databricks_config  import (
-    DATABRICKS_URL, 
-    TOKEN, 
-    catalog_name, 
-    schema_name, 
-    volume_name, 
-    dataset_location
-)
-
-def create_code_regulation_rag_chain(llm_model):
+def create_code_regulation_rag_chain(llm_model, catalog_name, schema_name, databricks_url, token):
     vs_endpoint_name = f"vs_endpoint_{catalog_name}"
     vs_index_fullname = f"{catalog_name}.{schema_name}.code_regulations_engineering_self_managed_vs_index"
     loaded_embedding_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
@@ -45,7 +31,7 @@ def create_code_regulation_rag_chain(llm_model):
         query_embeddings = loaded_embedding_model.encode([query])
         query_vector = query_embeddings[0].tolist()
         
-        vsc = VectorSearchClient(workspace_url=DATABRICKS_URL, personal_access_token=TOKEN, disable_notice=True)
+        vsc = VectorSearchClient(workspace_url=databricks_url, personal_access_token=token, disable_notice=True)
 
         retrieved = vsc.get_index(
             endpoint_name=vs_endpoint_name,
@@ -255,23 +241,3 @@ def create_code_regulation_rag_chain(llm_model):
     )
 
     return retriever_chain
-
-
-llm_model = ChatDatabricks(endpoint="databricks-meta-llama-3-1-70b-instruct", max_tokens=3000, temperature=0.0)
-code_regulation_rag_chain = create_code_regulation_rag_chain(llm_model)
-
-# Example question to pass to your process_question function
-code_regulation_question_2 = {"query": "What are the regulations for fcc?"}
-
-# Call the function to get the answer
-code_regulation_answer_2 = code_regulation_rag_chain.invoke(code_regulation_question_2["query"])
-
-console = Console()
-
-# Create Markdown objects with added headers
-md_input_2 = Markdown(f"**Input:**\n\n{code_regulation_answer_2['input']}")
-md_output_2 = Markdown(f"**Output:**\n\n{code_regulation_answer_2['output']}")
-
-# Print input and output in panels
-console.print(Panel(md_input_2, title="Input", expand=False))
-console.print(Panel(md_output_2, title="Output", expand=False))

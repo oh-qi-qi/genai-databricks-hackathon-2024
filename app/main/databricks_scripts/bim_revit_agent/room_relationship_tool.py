@@ -88,7 +88,7 @@ class RoomRelationshipTool:
             non_existing = []
             for i, room_lower in enumerate(room_names_lower):
                
-                best_match = process.extractOne(room_lower, existing_rooms_lower, score_cutoff=80)
+                best_match = process.extractOne(room_lower, existing_rooms_lower, score_cutoff=85)
               
                 if best_match:
                     # Find the original (non-lowercased) room name

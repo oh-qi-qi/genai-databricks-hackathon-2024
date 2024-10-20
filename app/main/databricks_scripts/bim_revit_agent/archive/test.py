@@ -59,3 +59,39 @@ for room_lower in room_names_lower:
 
 print("Existing:", existing)
 print("Non-existing:", non_existing)
+
+## Usage example
+#from common.databricks_config import (
+#    DATABRICKS_URL, 
+#    TOKEN, 
+#    DATABRICKS_WAREHOUSE_ID,
+#    catalog_name, 
+#    schema_name
+#)
+#
+#llm_model_name = "databricks-meta-llama-3-1-70b-instruct"
+#multi_chain_wrapper = MultiStageSystemWrapper(llm_model_name, catalog_name, schema_name, DATABRICKS_URL, TOKEN, DATABRICKS_WAREHOUSE_ID)
+
+#query_1 = pd.DataFrame([
+#    {"query": "What are FCC Room Requirements I have to comply with?", "debug_mode": True}
+#])
+#result_1 = multi_chain_wrapper.predict(model_input=query_1)
+#print_nested_dict_display(json.loads(result_1[0]))
+
+#query_2 = pd.DataFrame([
+#    {"query": "What is the path from FCC to Staircase?", "debug_mode": True}
+#])
+#result_2 = multi_chain_wrapper.predict(query_2)
+#print_nested_dict_display(json.loads(result_2[0]))
+
+#query_3 = pd.DataFrame([
+#    {"query": "Does the FCC comply with code and regulation?", "debug_mode": True}
+#])
+#result_3 = multi_chain_wrapper.predict(query_3)
+#print_nested_dict_display(json.loads(result_3[0]))
+#
+#query_4 = pd.DataFrame([
+#    {"query": "Hello, can you help me?", "debug_mode": False}
+#])
+#result_4 = multi_chain_wrapper.predict(query_4)
+#print_nested_dict_display(json.loads(result_4[0]))
