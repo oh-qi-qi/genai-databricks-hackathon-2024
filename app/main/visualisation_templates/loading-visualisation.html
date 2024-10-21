@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReguBIM AI Loading Animation (Above Text)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: "Source Sans Pro", sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: transparent;
+        }
+
+        #loading-container {
+            width: 300px;
+            height: 100px;
+            margin-left: 15px;
+            overflow: hidden;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .animation-container {
+            position: relative;
+            width: 100%;
+            height: 50px;
+            overflow: hidden;
+        }
+
+        .animation-scaling {
+            position: absolute;
+            top: 0;
+            left: 0px;
+            width: 500px;
+            height: 50px;
+            transform: scale(0.53);
+            transform-origin: top left;
+        }
+
+        .loading-text {
+            width: 100%;
+            color: #333;
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 1.4;
+            animation: glimmer 2s ease-in-out infinite;
+            z-index: 1;
+            padding: 10px 0;
+        }
+
+        @keyframes glimmer {
+            0%, 100% { opacity: 1; }
+            70% { opacity: 0.7; }
+        }
+
+        .excavator, .crane {
+            position: absolute;
+            top: 20px;
+            left: -100px;
+            width: 80px;
+            height: 75px;
+            transition: left 2s linear, opacity 1s;
+            z-index: 3;
+        }
+
+        .excavator-body { fill: #007BFF; }
+
+        .excavator-arm {
+            transform-origin: 30px 30px;
+            transition: transform 1s;
+        }
+
+        .sand-pile, .sand-toss {
+            position: absolute;
+            background-color: #ffc107;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            transition: transform 0.5s, opacity 0.5s;
+            z-index: 2;
+        }
+
+        .sand-pile {
+            top: 65px;
+            right: 20px;
+            width: 40px;
+            height: 20px;
+            opacity: 0;
+        }
+
+        .sand-toss {
+            top: 65px;
+            left: 150px;
+            width: 20px;
+            height: 10px;
+            opacity: 0;
+            transition: transform 1s, opacity 1s, left 1s, top 1s;
+        }
+
+        .crane-body { fill: #ffc107; }
+        .crane-base { fill: #333; }
+        .crane-cabin { fill: #87CEEB; }
+        .crane-arm { fill: #444; }
+
+        .crane-cable-hook-set { transition: transform 1s; }
+
+        .block {
+            position: absolute;
+            top: 66px;
+            right: 49px;
+            width: 10px;
+            height: 10px;
+            transition: all 1s linear;
+            z-index: 2;
+        }
+
+        .crane-block {
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        
+        /* Spinner animation */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, #00d2ff, #3a7bd5);
+            mask-image: radial-gradient(farthest-side, transparent calc(100% - 2px), black calc(100% - 1px));
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+    </style>
+</head>
+<body>
+    <div id="loading-container">
+        <div class="animation-container">
+            <div class="animation-scaling">
+                <div class="sand-pile"></div>
+                <div class="sand-toss"></div>
+                <svg class="excavator" viewBox="0 0 80 60">
+                    <rect class="excavator-body" x="10" y="30" width="40" height="20" rx="5" />
+                    <circle fill="#333" cx="20" cy="50" r="5" />
+                    <circle fill="#333" cx="40" cy="50" r="5" />
+                    <g class="excavator-arm">
+                        <rect class="excavator-body" x="30" y="25" width="40" height="5" />
+                        <rect class="excavator-body" x="65" y="20" width="5" height="15" />
+                        <path class="excavator-body" d="M65,35 L75,45 L65,45 Z" />
+                    </g>
+                </svg>
+                <svg class="crane" viewBox="0 0 200 200">
+                    <rect class="crane-base" x="20" y="170" width="100" height="20" />
+                    <rect class="crane-base" x="20" y="160" width="100" height="10" />
+                    <circle cx="40" cy="190" r="8" fill="#777" />
+                    <circle cx="60" cy="190" r="8" fill="#777" />
+                    <circle cx="80" cy="190" r="8" fill="#777" />
+                    <circle cx="100" cy="190" r="8" fill="#777" />
+                    <rect class="crane-body" x="30" y="100" width="80" height="60" />
+                    <rect class="crane-cabin" x="40" y="110" width="60" height="30" />
+                    <rect class="crane-base" x="110" y="30" width="10" height="140" />
+                    <polygon class="crane-arm" points="120,30 180,100 180,110 120,40" />
+                    <g class="crane-cable-hook-set">
+                        <line x1="175" y1="100" x2="175" y2="145" stroke="#000" stroke-width="2" class="crane-cable" />
+                        <path d="M175 148 C 177 148, 179 150, 179 152 C 179 154, 177 156, 175 156 C 173 156, 171 155, 171 153" fill="none" stroke="#000" stroke-width="2" class="crane-hook" />
+                        <circle cx="175" cy="146" r="3" fill="#666" class="crane-hook-circle" />
+                        <g class="crane-block" transform="translate(165, 160)">
+                            <rect x="0" y="5" width="20" height="20" fill="#555" />
+                            <path d="M2 1 Q10 4, 18 1 L18 5 L2 5 Z" fill="none" stroke="#000" stroke-width="1.5" />
+                        </g>
+                    </g>
+                </svg>
+                <svg class="block" viewBox="0 0 20 25">
+                    <rect x="0" y="5" width="20" height="20" fill="#555" />
+                    <path d="M2 1 Q10 4, 18 1 L18 5 L2 5 Z" fill="none" stroke="#000" stroke-width="1.5" />
+                </svg>
+            </div>
+        </div>
+        <div class="loading-text">
+            <div class="spinner"></div>
+            <span id="message"></span>
+        </div>
+    </div>
+     
+    <script>
+        const loadingMessages = [
+            "ReguBIM AI is processing your request...",
+            "Cementing our regulatory expertise...",
+            "Analyzing building codes rigorously...",
+            "Constructing compliance, brick by brick",
+            "Excavating depths of zoning bylaws...",
+            "Scaffolding a framework of adherence...",
+            "Nailing down the finer points of code",
+            "Reinforcing the structure of standards",
+            "Raising the bar on building safety...",
+            "Blueprinting paths to code conformity",
+            "We're not just floor-ing around here!"
+        ];
+
+        const messageElement = document.getElementById('message');
+        const excavator = document.querySelector('.excavator');
+        const excavatorArm = document.querySelector('.excavator-arm');
+        const sandPile = document.querySelector('.sand-pile');
+        const sandToss = document.querySelector('.sand-toss');
+
+        const crane = document.querySelector('.crane');
+        const cableHookSet = document.querySelector('.crane-cable-hook-set');
+        const craneCable = document.querySelector('.crane-cable');
+        const craneHook = document.querySelector('.crane-hook');
+        const craneHookCircle = document.querySelector('.crane-hook-circle');
+        const craneBlock = document.querySelector('.crane-block');
+        const block = document.querySelector('.block');
+
+        let currentIndex = 0;
+
+        function updateLoadingMessage() {
+            messageElement.textContent = loadingMessages[currentIndex];
+            currentIndex = (currentIndex + 1) % loadingMessages.length;
+        }
+
+        function getRandomPosition() {
+            const left = Math.floor(Math.random() * 150) + 90;
+            const top = Math.floor(Math.random() * 20) + 55;
+            return { left, top };
+        }
+
+        function animateExcavator(callback) {
+            excavator.style.opacity = '1';
+            sandPile.style.opacity = '0';
+            sandPile.style.transform = 'scaleY(1)';
+            crane.style.opacity = '0';
+            block.style.opacity = '0';
+            sandToss.style.opacity = '0';
+
+            excavator.style.left = '0';
+
+            setTimeout(() => { sandPile.style.opacity = '1'; }, 1000);
+            setTimeout(() => { excavator.style.left = 'calc(100% - 120px)'; }, 2000);
+            setTimeout(() => {
+                excavatorArm.style.transform = 'rotate(-45deg)';
+                sandPile.style.transform = 'scaleY(0)';
+                sandPile.style.opacity = '0';
+            }, 4000);
+            setTimeout(() => { excavatorArm.style.transform = 'rotate(0deg)'; }, 5000);
+            setTimeout(() => {
+                const { left, top } = getRandomPosition();
+                sandToss.style.left = `${left}px`;
+                sandToss.style.top = `${top}px`;
+                sandToss.style.opacity = '1';
+            }, 6000);
+            setTimeout(() => { excavator.style.left = `${parseInt(sandToss.style.left) - 60}px`; }, 7000);
+            setTimeout(() => {
+                excavatorArm.style.transform = 'rotate(-45deg)';
+                sandToss.style.opacity = '0';
+            }, 9000);
+            setTimeout(() => { excavatorArm.style.transform = 'rotate(0deg)'; }, 10000);
+            setTimeout(() => { 
+                excavator.style.left = '-100px'; 
+                if (callback) setTimeout(callback, 2000);
+            }, 11000);
+        }
+
+        function animateCrane(callback) {
+            const { left, top } = getRandomPosition();
+            block.style.left = `${left-2}px`;
+            block.style.top = `${top+8}px`;
+            block.style.right = 'auto';
+            block.style.transform = 'translateY(0px)';
+            block.style.opacity = '1';
+            
+            crane.style.opacity = '1';
+            excavator.style.opacity = '0';
+            
+            crane.style.left = '0px';
+            cableHookSet.style.transform = 'translateY(0)';
+            craneBlock.style.opacity = '0';
+
+            const craneStopPosition = left - 66;
+
+            setTimeout(() => { 
+                crane.style.left = `${craneStopPosition}px`; 
+            }, 1000);
+            
+            setTimeout(() => {
+                cableHookSet.style.transform = `translateY(${top - 66}px)`;
+                craneHookCircle.style.transform = 'translateY(20px)';
+                craneCable.setAttribute('y2', '165');
+                craneHook.setAttribute('d', 'M175 168 C 177 168, 179 170, 179 172 C 179 174, 177 176, 175 176 C 173 176, 171 175, 171 173');
+            }, 3000);
+            
+            setTimeout(() => {
+                block.style.opacity = '0';
+                craneBlock.style.opacity = '1';
+            }, 4000);
+        
+            setTimeout(() => {
+                crane.style.left = '-100px';
+                if (callback) setTimeout(callback, 2000);
+            }, 5000);
+        }
+
+        function alternateAnimations() {
+            animateExcavator(() => {
+                animateCrane(() => {
+                    alternateAnimations();
+                });
+            });
+        }
+
+        updateLoadingMessage();
+        alternateAnimations();
+
+        setInterval(updateLoadingMessage, 10000);
+    </script>
+</body>
+</html>

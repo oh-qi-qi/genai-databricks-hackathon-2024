@@ -9,8 +9,8 @@ import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
 
-import logging
-logging.basicConfig(level=logging.INFO)
+#import logging
+#logging.basicConfig(level=logging.INFO)
 
 main_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, main_dir)
@@ -20,8 +20,8 @@ from databricks_scripts.multi_chain import MultiStageSystemWrapper
 from common.utils import print_nested_dict_display
 
 from common.databricks_config import (
-    DATABRICKS_URL, 
-    TOKEN, 
+    DATABRICKS_HOST, 
+    DATABRICKS_TOKEN, 
     DATABRICKS_WAREHOUSE_ID,
     catalog_name, 
     schema_name
@@ -32,6 +32,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 svg_logo_path = os.path.join(current_dir, "assets", "logo-regubim-ai.svg")
 ico_logo_path = os.path.join(current_dir, "assets", "logo-regubim-ai.ico")
 chat_history_path = os.path.join(current_dir, "chat_history.json")
+html_file_path = os.path.join(current_dir, "visualisation_templates", "loading-visualisation.html")
 visualisation_template_path = os.path.join(current_dir, "visualisation_templates", "room-route-visualisation-min.html")
 visualisation_iframe_height = 500
 
@@ -56,11 +57,6 @@ if os.path.exists(svg_logo_path):
 else:
     st.error("SVG logo file not found")
 
-
-# List of loading messages
-loading_messages = [
-    "ReguBIM AI is processing your request..."
-]
 
 def display_welcome_message():
     st.markdown("""
@@ -90,8 +86,8 @@ def call_databricks_chain(prompt, max_time=180, poll_interval=10):
         
         query_df = pd.DataFrame([{"query": prompt, "debug_mode": False}])
         
-        llm_model_name = "databricks-meta-llama-3-1-70b-instruct"
-        multi_chain_wrapper = MultiStageSystemWrapper(llm_model_name, catalog_name, schema_name, DATABRICKS_URL, TOKEN, DATABRICKS_WAREHOUSE_ID)
+        llm_model = "databricks-meta-llama-3-1-70b-instruct"
+        multi_chain_wrapper = MultiStageSystemWrapper(llm_model, catalog_name, schema_name, DATABRICKS_HOST, DATABRICKS_TOKEN, DATABRICKS_WAREHOUSE_ID)
         
         start_time = time.time()
         warning_issued = False
@@ -100,22 +96,12 @@ def call_databricks_chain(prompt, max_time=180, poll_interval=10):
             result = multi_chain_wrapper.predict(query_df)
             
             if result is not None:
+                elapsed_time = time.time() - start_time
+                print(f"Waiting... Elapsed time: {elapsed_time:.1f} seconds")
                 try:
                     return result[0]
                 except json.JSONDecodeError:
-                    pass  # We'll print the waiting message below
-            
-            elapsed_time = time.time() - start_time
-            print(f"Waiting... Elapsed time: {elapsed_time:.1f} seconds")
-            
-            if elapsed_time > 120 and not warning_issued:
-                print("⚠️ Warning: Query is taking longer than 120 seconds.")
-                warning_issued = True
-            
-            if elapsed_time > max_time:
-                return {"error": f"Query timed out after {max_time} seconds."}
-            
-            time.sleep(poll_interval)
+                    return {"error": f"Error: {str(e)}"}
     
     except Exception as e:
         return {"error": f"Error: {str(e)}"}
@@ -194,8 +180,6 @@ if 'current_chat_index' not in st.session_state:
     st.session_state.current_chat_index = None
 if 'loading' not in st.session_state:
     st.session_state.loading = False
-if 'loading_message' not in st.session_state:
-    st.session_state.loading_message = random.choice(loading_messages)
 
 # Custom CSS for the spinner and layout
 st.markdown("""
@@ -228,49 +212,11 @@ st.markdown("""
             flex: 1;
         }
 
-        /* Spinner animation */
-        .spinner {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: conic-gradient(from 0deg, #00d2ff, #3a7bd5);
-            mask-image: radial-gradient(farthest-side, transparent calc(100% - 2px), black calc(100% - 1px));
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            margin-right: 10px;
-            vertical-align: middle;
-        }
-
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
         /* Loading text animation */
-        .loading-container {
-            display: flex;
-            align-items: center;
+        .loading-animation-container {
             margin-left: 5px;
             margin-top: -10px;
         }
-
-        .loading-text {
-            display: inline-block;
-            vertical-align: middle;
-            margin-left: 5px;
-            color: gray;
-            animation: ripple 2s ease-in-out infinite;
-        }
-
-        @keyframes ripple {
-            0% { transform: translateY(0); }
-            25% { transform: translateY(-2px); }
-            50% { transform: translateY(0); }
-            75% { transform: translateY(2px); }
-            100% { transform: translateY(0); }
-        }
-
         /* Sidebar customization */
         .sidebar .sidebar-content {
             background-color: #f0f0f5;
@@ -415,25 +361,39 @@ if st.session_state.messages:
                 components.html(message["visualization"], height=visualisation_iframe_height, scrolling=True)
 else:
     display_welcome_message()
-    
+
+
+
+if os.path.exists(html_file_path):
+    with open(html_file_path, "r", encoding="utf-8") as file:
+        html_content = file.read()
+else:
+    st.error(f"HTML file not found at: {html_file_path}")
+
+# Full HTML content including the loading animation
+full_html_content = f"""
+<div class="loading-animation-container">
+    {html_content}
+</div>
+"""
+
+# Function to insert loading animation
+def insert_loading_animation():
+    return components.html(full_html_content, height=100)  # Adjust height as needed
+
+# Function to remove loading animation
+def remove_loading_animation(component_to_remove):
+    component_to_remove.empty()
+
 # Handle loading state and model response
 if st.session_state.loading:
-    # Display loading message outside of chat messages
-    loading_placeholder = st.empty()
-    loading_placeholder.markdown(f"""
-    <div class="loading-container">
-        <div class="spinner"></div>
-        <div class="loading-text">{st.session_state.loading_message}</div>
-    </div>
-    """, unsafe_allow_html=True)
-
+    loading_component = insert_loading_animation()
     try:
         chain_response = call_databricks_chain(prompt=st.session_state.messages[-1]["content"])
         
         if chain_response:
             st.session_state.loading = False
-            loading_placeholder.empty()  # Remove the loading message
-        
+            remove_loading_animation(loading_component)
             try:
                 response_dict = json.loads(chain_response)
                 if "error" in response_dict:
@@ -456,15 +416,12 @@ if st.session_state.loading:
 
                     st.session_state.chat_history[st.session_state.current_chat_index]["messages"] = st.session_state.messages
                     save_chat_history(st.session_state.chat_history)
+                    
             except json.JSONDecodeError:
                 st.error("Received an invalid response from the model.")
     except Exception as e:
         st.session_state.loading = False
-        loading_placeholder.empty()  # Remove the loading message
+        remove_loading_animation(loading_component)
         st.error(f"An error occurred while processing your request: {str(e)}")
 
     st.rerun()
-
-# Update loading message
-if st.session_state.loading:
-    st.session_state.loading_message = random.choice(loading_messages)

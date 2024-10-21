@@ -1,6 +1,6 @@
 env:
-  - name: "DATABRICKS_URL"
-    valueFrom: "DATABRICKS_URL"
+  - name: "DATABRICKS_HOST"
+    valueFrom: "DATABRICKS_HOST"
   - name: "DATABRICKS_TOKEN"
     valueFrom: "DATABRICKS_TOKEN"
   - name: "DATABRICKS_WAREHOUSE_ID"
