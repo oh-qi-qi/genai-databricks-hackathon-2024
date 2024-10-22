@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RoomGraph", "RoomGraph\RoomGraph.csproj", "{CC4854BA-46D6-4B1E-8E49-B299E0247550}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{B3BD4506-0127-425F-97FA-DF7D26F192A1}"
+	ProjectSection(SolutionItems) = preProject
+		readme.md = readme.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Demo", "Demo", "{2007FF40-2AC2-4310-AEC4-08177796A3A9}"
+	ProjectSection(SolutionItems) = preProject
+		data\grid_line.json = data\grid_line.json
+		data\related_doors.json = data\related_doors.json
+		data\room_relationship.json = data\room_relationship.json
+		data\Sample Office Building Model V2.rvt = data\Sample Office Building Model V2.rvt
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CC4854BA-46D6-4B1E-8E49-B299E0247550}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC4854BA-46D6-4B1E-8E49-B299E0247550}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC4854BA-46D6-4B1E-8E49-B299E0247550}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC4854BA-46D6-4B1E-8E49-B299E0247550}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2007FF40-2AC2-4310-AEC4-08177796A3A9} = {B3BD4506-0127-425F-97FA-DF7D26F192A1}
+	EndGlobalSection
+EndGlobal
