@@ -44,7 +44,6 @@ for package, version in packages.items():
 
 print("All packages are checked and installed if necessary.")
 
-
 # COMMAND ----------
 
 # MAGIC %md
