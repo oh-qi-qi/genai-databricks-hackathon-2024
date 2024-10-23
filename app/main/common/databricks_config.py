@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Get Databricks environment variables
-DATABRICKS_HOST = os.getenv('DATABRICKS_HOST')
+DATABRICKS_HOST = f"https://{os.getenv('DATABRICKS_HOST')}"
 DATABRICKS_TOKEN = os.getenv('DATABRICKS_TOKEN')
 DATABRICKS_WAREHOUSE_ID = os.getenv('DATABRICKS_WAREHOUSE_ID')
 DATABRICKS_LLM_SERVING_ENDPOINT = os.getenv('DATABRICKS_LLM_SERVING_ENDPOINT')
