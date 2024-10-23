@@ -1,5 +1,8 @@
 mlflow==2.16.2
-transformers==4.36.1
+transformers==4.45.2  # Updated
+sentence-transformers==3.2.1  # Updated
+tokenizers==0.20.1  # New
+huggingface-hub>=0.20.0  # New
 llama-index==0.11.17
 pydantic==2.7.4
 accelerate==0.25.0
@@ -7,7 +10,6 @@ PyPDF2==3.0.1
 PyMuPDF==1.24.11
 sentencepiece==0.1.99
 pdfminer.six==20240706
-sentence-transformers==2.2.2
 databricks-vectorsearch==0.42
 langchain==0.3.3
 langchain-community==0.3.2
@@ -23,5 +25,4 @@ databricks-sdk==0.34.0
 networkx==3.4.1
 python-dotenv
 requests
-rich
 streamlit
