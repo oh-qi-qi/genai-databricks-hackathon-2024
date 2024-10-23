@@ -27,6 +27,7 @@ from common.databricks_config import (
     schema_name
 )
 
+DATABRICKS_HOST = f"https://{DATABRICKS_HOST}"
 # Dynamically get the path to the assets directory and chat history file
 current_dir = os.path.dirname(os.path.abspath(__file__))
 svg_logo_path = os.path.join(current_dir, "assets", "logo-regubim-ai.svg")
