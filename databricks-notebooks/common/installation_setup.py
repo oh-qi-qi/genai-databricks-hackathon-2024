@@ -4,30 +4,30 @@ import os
 catalog_name = spark.sql("SELECT current_catalog()").collect()[0][0]
 schema_name = spark.catalog.currentDatabase()
 working_directory = os.getcwd()
-volume_name = "regubim-ai-volume"
-dataset_location = f"/Volumes/{catalog_name}/{schema_name}/{volume_name}/"
+
+general_volume = f"/Volumes/{catalog_name}/{schema_name}/regubim-ai-general-volume/"
+regulation_volume = f"/Volumes/{catalog_name}/{schema_name}/regubim-ai-regulation-data-volume/"
+bim_volume = f"/Volumes/{catalog_name}/{schema_name}/regubim-ai-bim-data-volume/"
 
 print(f"Catalog Name: {catalog_name}")
 print(f"Schema Name: {schema_name}")
 print(f"Working Directory: {working_directory}")
-print(f"Volume Name: {volume_name}")
-print(f"Dataset Location: {dataset_location}")
 
-files = dbutils.fs.ls(dataset_location)
+def print_files_in_volume(volume_name):
+    files = dbutils.fs.ls(volume_name)
 
-# Print the files and folders in the volume
-for file in files:
-    print(file.name)
+    # Print the files and folders in the volume
+    for file in files:
+        print(file.name)
 
-# COMMAND ----------
+print(f"General Volume Name: {general_volume}")
+print_files_in_volume(general_volume)
 
-# Copy the file from the volume to DBFS
-volume_file_path = f"{dataset_location}/SCDF Chapter 8 - Emergency Lighting & Voice Communication Systems.pdf"
-dbfs_target_path = "/dbfs/tmp/SCDF_Chapter_8.pdf"
+print(f"Regulation Volume Name: {regulation_volume}")
+print_files_in_volume(regulation_volume)
 
-# Copy the file from volume to DBFS
-dbutils.fs.cp(volume_file_path, dbfs_target_path)
-
+print(f"BIM Volume Name: {bim_volume}")
+print_files_in_volume(bim_volume)
 
 # COMMAND ----------
 
