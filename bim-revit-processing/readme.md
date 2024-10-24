@@ -1,7 +1,5 @@
-## Revit Room & Door Data Extraction Overview
-
 ## Overview
-This code extracts room and door information from a Revit model, focusing on the spatial relationships between doors and their connected rooms. It captures essential geometric and metadata properties, outputting them in a structured JSON format for further processing or analysis.
+This code extracts room, door and room relationship information from a Revit model, focusing on the spatial relationships between doors and their connected rooms. It captures essential geometric and metadata properties, outputting them in a structured JSON format for further processing or analysis.
 
 ## Key Features
 - Extracts door properties including location, size, and type
