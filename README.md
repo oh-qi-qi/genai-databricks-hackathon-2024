@@ -14,9 +14,9 @@ ReguBEAM AI is a generative AI-powered compliance assistant that revolutionizes 
 ```
 
 For detailed information about each section and how to use it, please refer to their respective README files:
-- [app/README.md](./app/README.md)
-- [bim-revit-processing/README.md](./bim-revit-processing/README.md)
-- [databricks-notebooks/README.md](./databricks-notebooks/README.md)
+- [app/README.md](./app)
+- [bim-revit-processing/README.md](./bim-revit-processing)
+- [databricks-notebooks/README.md](./databricks-notebooks)
 
 ## 🏗️ System Architecture
 ReguBIM AI is built on Databricks' scalable architecture, utilizing a medallion pattern for efficient data management. The system automates data processing through ETL pipelines triggered by file arrivals, transforming both BIM models and regulatory documents from raw data to analysis-ready formats. The application is deployed as a Databricks App, leveraging Databricks' serverless infrastructure.
