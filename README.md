@@ -1,8 +1,9 @@
+This project is for [Generative AI World Cup 2024: So you think you can hack](https://hackathon.stackup.dev/web/events/generative-ai-world-cup-2024-so-you-think-you-can-hack) hosted by Databricks
 <div align="center">
   <img src="https://github.com/user-attachments/assets/08b17550-558e-4138-9045-a16bf7eace05" width="450" alt="ReguBIM AI Logo">
 </div>
 
-ReguBEAM AI is a generative AI-powered compliance assistant that revolutionizes regulatory verification and building design compliance. By leveraging BIM models and regulatory documents, ReguBEAM AI streamlines building code checks, reducing time, costs, and human error.
+ReguBEAM AI is a generative AI-powered compliance assistant that revolutionizes regulatory verification and building design compliance. By leveraging BIM models and regulatory documents, ReguBEAM AI streamlines building code checks, reducing time, costs, and human error. 
 
 ## 📂 Project Structure
 
