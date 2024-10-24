@@ -1,4 +1,3 @@
-# ReguBIM AI
 <div align="center">
   <img src="https://github.com/user-attachments/assets/08b17550-558e-4138-9045-a16bf7eace05" width="450" alt="ReguBIM AI Logo">
 </div>
