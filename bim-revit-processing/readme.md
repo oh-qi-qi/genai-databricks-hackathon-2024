@@ -10,43 +10,95 @@ This code extracts room and door information from a Revit model, focusing on the
 - Preserves 3D coordinate information
 - Outputs standardized JSON format
 
-## Sample Output
+## Sample Data and Output
+The data here are curated for this Hackathon only:
+- model: https://autode.sk/40aNFij
+- grid_line.json - [grid_line.json](./data/grid_line.json)
+- related_doors.json - [related_doors.json](./data/related_doors.json)
+- room.json - [room.json](./data/room_relationship.json)
 
+### Room Sample Output
 ```json
-{
-  "door": {
-    "id": 430758,
-    "name": "72\" x 84\"",
-    "level": "01 - Entry Level",
-    "type": "322D",
-    "bounds": [
+[
+  {
+    "doors": [
       {
-        "X": 324.49885461445359,
-        "Y": -49.183028468366324,
-        "Z": -2.0791610813758307E-16
-      },
-      // ... additional boundary points
+        "door": {
+          "id": 430758,
+          "name": "72\" x 84\"",
+          "level": "01 - Entry Level",
+          "type": "322D",
+          "bounds": [
+            {
+              "X": 324.49885461445359,
+              "Y": -49.183028468366324,
+              "Z": -2.0791610813758307E-16
+            },
+            {
+              "X": 330.99885461445359,
+              "Y": -49.183028468366324,
+              "Z": -2.0791610813758307E-16
+            },
+            {
+              "X": 330.99885461445359,
+              "Y": -45.349695135032917,
+              "Z": 7.2499999999999982
+            },
+            {
+              "X": 324.49885461445359,
+              "Y": -45.349695135032917,
+              "Z": -2.0791610813758307E-16
+            }
+          ]
+        },
+        "fromRoom": {
+          "id": 526445,
+          "name": "ELECTRICAL 01-26",
+          "number": "01-26",
+          "area": "173 m²",
+          "perimeter": "52627",
+          "volume": "0.00 CF",
+          "height": "3658",
+          "level": "01 - Entry Level",
+          "bounds": [
+            {
+              "X": 306.95466215664754,
+              "Y": -94.419872864679775,
+              "Z": 0.0
+            },
+            {
+              "X": 347.96492207225958,
+              "Y": -94.419872864679775,
+              "Z": 0.0
+            }
+          ]
+        },
+        "toRoom": {
+          "id": 526452,
+          "name": "HALLWAY 01-33",
+          "number": "01-33",
+          "area": "2210 m²",
+          "perimeter": "294314",
+          "volume": "0.00 CF",
+          "height": "3658",
+          "level": "01 - Entry Level",
+          "bounds": [
+            {
+              "X": 347.96492207225958,
+              "Y": -48.349695135033016,
+              "Z": 0.0
+            },
+            {
+              "X": 347.96492207225958,
+              "Y": -16.333793208468208,
+              "Z": 0.0
+            }
+          ]
+        }
+      }
     ]
-  },
-  "fromRoom": {
-    "id": 526445,
-    "name": "ELECTRICAL 01-26",
-    "number": "01-26",
-    "area": "173 m²",
-    "perimeter": "52627",
-    "volume": "0.00 CF",
-    "height": "3658",
-    "level": "01 - Entry Level",
-    "bounds": [
-      // Room boundary points
-    ]
-  },
-  "toRoom": {
-    "id": 526452,
-    "name": "HALLWAY 01-33",
-    // ... additional room properties
   }
-}
+]
 ```
 
 ## Data Structure
@@ -67,13 +119,6 @@ This code extracts room and door information from a Revit model, focusing on the
 - `height`: Room height
 - `level`: Building level
 - `bounds`: Room boundary points
-
-## Model
-The data here are curated for this Hackathon only:
-- model: https://autode.sk/40aNFij
-- grid_line.json - [grid_line.json](./data/grid_line.json)
-- related_doors.json - [related_doors.json](./data/related_doors.json)
-- room.json - [room.json](./data/room_relationship.json)
 
 ## How to run ?
 - Clone the project
