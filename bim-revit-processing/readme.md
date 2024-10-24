@@ -15,9 +15,9 @@ The data here are curated for this Hackathon only:
 - model: https://autode.sk/40aNFij
 - grid_line.json - [grid_line.json](./data/grid_line.json)
 - related_doors.json - [related_doors.json](./data/related_doors.json)
-- room.json - [room.json](./data/room_relationship.json)
+- room_relationship.json - [room.json](./data/room_relationship.json)
 
-### Room Sample Output
+### Room Relationship Sample Output
 ```json
 [
   {
