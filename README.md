@@ -92,7 +92,6 @@ ReguBIM AI processes user queries through different chains:
 * Sample queries:
    * "How many rooms are there and can you list all the rooms?"
    * "What is the path from FCC to Staircase?"
-   * "What are all accessible routes from the main entrance?"
 
 3. **Automated Compliance Checks**
    <div align="left">
@@ -104,8 +103,6 @@ ReguBIM AI processes user queries through different chains:
 * Identifies specific violations and suggests corrections
 * Sample queries:
    * "Does the FCC comply with codes and regulations?"
-   * "Check if the fire escape routes meet safety requirements"
-   * "Verify if all room dimensions comply with accessibility standards"
 
 Additionally, ReguBIM AI includes a **General Response Chain** for handling basic interactions and queries:
 * Processes general inquiries and conversational interactions
