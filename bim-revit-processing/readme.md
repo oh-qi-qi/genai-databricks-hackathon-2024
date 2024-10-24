@@ -1,25 +1,81 @@
-Hackathon : 
+## Revit Room & Door Data Extraction Overview
 
-## Generative AI World Cup 2024: So you think you can hack
+## Overview
+This code extracts room and door information from a Revit model, focusing on the spatial relationships between doors and their connected rooms. It captures essential geometric and metadata properties, outputting them in a structured JSON format for further processing or analysis.
 
-Challenge : https://hackathon.stackup.dev/web/events/generative-ai-world-cup-2024-so-you-think-you-can-hack
+## Key Features
+- Extracts door properties including location, size, and type
+- Captures room metadata such as area, volume, and boundaries
+- Maintains spatial relationships between doors and rooms
+- Preserves 3D coordinate information
+- Outputs standardized JSON format
 
-## Solution 
+## Sample Output
 
-Graph Room Prediction using Graph
+```json
+{
+  "door": {
+    "id": 430758,
+    "name": "72\" x 84\"",
+    "level": "01 - Entry Level",
+    "type": "322D",
+    "bounds": [
+      {
+        "X": 324.49885461445359,
+        "Y": -49.183028468366324,
+        "Z": -2.0791610813758307E-16
+      },
+      // ... additional boundary points
+    ]
+  },
+  "fromRoom": {
+    "id": 526445,
+    "name": "ELECTRICAL 01-26",
+    "number": "01-26",
+    "area": "173 m²",
+    "perimeter": "52627",
+    "volume": "0.00 CF",
+    "height": "3658",
+    "level": "01 - Entry Level",
+    "bounds": [
+      // Room boundary points
+    ]
+  },
+  "toRoom": {
+    "id": 526452,
+    "name": "HALLWAY 01-33",
+    // ... additional room properties
+  }
+}
+```
 
-The layout for each building level adheres to fixed boundaries, allowing for some flexibility in room placement. While certain areas, such as restrooms, stairwells, and corridors, are fixed in position, all other rooms can be adjusted horizontally within the designated space. Rooms may expand into adjacent areas if necessary; however, vertical adjustments are not permitted. Clients may have specific preferences for room adjacency, which will be taken into consideration during the design process. The following seven disciplines are represented:
+## Data Structure
+### Door Properties
+- `id`: Unique identifier
+- `name`: Size/dimensions
+- `level`: Building level
+- `type`: Door classification
+- `bounds`: 3D boundary points
 
-![](./data/Revit_I71KsVtADA.png)
+### Room Properties
+- `id`: Unique identifier
+- `name`: Room name with number
+- `number`: Room number
+- `area`: Floor area
+- `perimeter`: Room perimeter
+- `volume`: Room volume
+- `height`: Room height
+- `level`: Building level
+- `bounds`: Room boundary points
 
-## Data
-
+## Model
+The data here are curated for this Hackathon only:
+- model: https://autode.sk/40aNFij
 - grid_line.json - [grid_line.json](./data/grid_line.json)
 - related_doors.json - [related_doors.json](./data/related_doors.json)
 - room.json - [room.json](./data/room_relationship.json)
 
 ## How to run ?
-
 - Clone the project
 - Open Revit Software and demo model
 - Build the project and use [Revit Add-in Manager](https://github.com/chuongmep/RevitAddInManager) to run command :
