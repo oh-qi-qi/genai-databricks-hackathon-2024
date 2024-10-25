@@ -65,8 +65,10 @@ Seamless workspace integration
 Automatic credential management
 Built-in security controls
 Real-time data access
+
 Sample URL Link: https://regubimai-1294267129871822.aws.databricksapps.com/
-For comprehensive information about Databricks Apps, including deployment, configuration, and best practices, please refer to the official [Databricks Apps](https://docs.databricks.com/en/dev-tools/databricks-apps/index.html)documentation.
+
+For comprehensive information about Databricks Apps, including deployment, configuration, and best practices, please refer to the official [Databricks Apps](https://docs.databricks.com/en/dev-tools/databricks-apps/index.html) documentation.
 
 ## Prerequisites
 - Python 3.10.12
