@@ -43,13 +43,18 @@ DATABRICKS_WAREHOUSE_ID=<your-warehouse-id>
 ## Running the Application
 
 ### Method 1: Local Development
-1. Clone the repository
-2. Install dependencies:
+1. Create a conda environment
+   ```bash
+   conda create -n test_env python=3.10.12
+   conda activate test_env
+   ```
+2. Clone the repository
+3. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
-3. Navigate to the main folder
-4. Run the application:
+4. Navigate to the main folder
+5. Run the application:
    ```bash
    streamlit run main/app.py
    ```
@@ -60,7 +65,10 @@ Seamless workspace integration
 Automatic credential management
 Built-in security controls
 Real-time data access
-For comprehensive information about Databricks Apps, including deployment, configuration, and best practices, please refer to the official [Databricks Apps]([URL](https://docs.databricks.com/en/dev-tools/databricks-apps/index.html)documentation.
+
+Sample URL Link: https://regubimai-1294267129871822.aws.databricksapps.com/
+
+For comprehensive information about Databricks Apps, including deployment, configuration, and best practices, please refer to the official [Databricks Apps](https://docs.databricks.com/en/dev-tools/databricks-apps/index.html) documentation.
 
 ## Prerequisites
 - Python 3.10.12
